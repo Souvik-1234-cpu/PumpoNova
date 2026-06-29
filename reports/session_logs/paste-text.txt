@@ -61,3 +61,23 @@ Section 4.3 — Settle the definitional edges:
   Edge 3: one foundational pass or two (recommendation on record: foundation
           thread primary + leakage diagnostic parallel on frozen prototype).
 ================================================================
+
+STAGE 4.3 / E.7 — THREE EDGES  [SETTLED]
+Edge 1 collapse-bar: physically-explained + reproducible (>1 segment) + literature-authenticated. One-offs = candidate only.
+Edge 2 vocabulary: break-cause buckets (normal shutdown / trip / startup transient / sensor dropout / genuine fault / unknown); deviation in RAW engineering units vs literature/physics envelope (NOT normalised); descriptors step/ramp/spike/oscillation/drift/dropout; 4 Principal Criteria (which/how-much/how/rate).
+Edge 3: TWO investigations — Thread A (M1 re-seg) PRIMARY, Thread B (leakage diag) PARALLEL on frozen prototype only.
+Dataset inventory: 9 raw sets; 1-8 usable; #9 corrupted (NaN) -> excluded from clean pool but RETAINED for Thread-A forensics (not deleted).
+Work log written: reports/session_logs/Pumponova_WorkLog.md (commit + push).
+BLOCKER before Thread A: raw datasets not yet in data/raw/. On arrival -> Section 2.5 verify (9 files, schema/units/cadence of 1-8, characterise #9 NaN pattern).
+Next: add raw data + tell Claude the file format -> verification script -> Thread A re-segmentation.
+
+SESSION CLOSE (2026-06-29)
+Done: 3 edges settled + work log committed; dataset inventory CORRECTED (8 valid + Pump_C_Day3 off-day/corrupt);
+      unit discrepancy (bar / mm/s) raised as BLOCKING for Edge-2; dataset+asset reference card written -> docs/.
+Reference card: docs/Pumponova_Dataset_Reference.md (also to upload to project knowledge base). Units marked PROVISIONAL,
+      to be authenticated + updated VERIFIED in Thread A.
+NEXT SESSION = Thread A start:
+  Step 1 - forensic inspector script (byte-level read of all 9 CSVs: headers, rows, encoding, true cadence, value ranges,
+           confirm Pump_C_Day3 separator-mangling extent) -> reports/thread_a/.
+  Step 2 - unit authentication against nameplate + ISO 10816/13373 -> update reference card.
+  Then - re-segmentation (E.4.2) without discarding short/broken segments.
