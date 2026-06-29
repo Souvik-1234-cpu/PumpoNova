@@ -1,0 +1,63 @@
+PUMPONOVA STATUS
+Stage: 4.2 — Open the Pumponova project
+Done: folder C:\Users\user\Desktop\Pumponova_Project cloned from empty remote (origin = github.com/Souvik-1234-cpu/PumpoNova); fresh .venv; stack installed; torch 2.6.0+cu126, cuda True, RTX 4060 verified. Python 3.13 (cp313 wheels) noted. torchvision pinned to 0.21.0 (correct match for torch 2.6.0, unused).
+Blocker found + fixed: file was named "gitignore" not ".gitignore" -> rename, then add/commit/push.
+Open: (1) confirm git status hides .venv after rename; (2) confirm push succeeds; (3) confirm PumpSmart freeze + two truth-numbers (Section 4.1) before 4.3.
+Next: Section 4.3 — settle the definitional edges.
+
+
+================================================================
+PUMPONOVA — RUNNING STATUS TRACKER
+================================================================
+Project: Pumponova (independent re-build; PumpSmart = reference/memory only)
+Repo:    github.com/Souvik-1234-cpu/PumpoNova
+Local:   C:\Users\user\Desktop\Pumponova_Project
+Updated: 2026-06-29
+
+----------------------------------------------------------------
+STAGE 4.2 — OPEN THE PUMPONOVA PROJECT  [COMPLETE]
+----------------------------------------------------------------
+DONE:
+- Local folder cloned from empty remote; origin wired (fetch + push).
+- Fresh .venv created and activated (isolated from PumpSmart).
+- Stack installed: torch 2.6.0+cu126, torchvision 0.21.0, torchaudio,
+  numpy, pandas, scikit-learn, xgboost, matplotlib, scipy,
+  fastapi, uvicorn, requests.
+- GPU verified: cuda True, NVIDIA GeForce RTX 4060 Laptop GPU.
+- .gitignore committed (826b287) + pushed; main -> origin/main tracking set.
+
+VERIFIED (Section 2.5):
+- sys.executable inside .venv (not global / not PumpSmart).
+- torch.cuda.is_available() == True on RTX 4060.
+- git status hid .venv/ before commit -> ignore policy works, no wheels leaked.
+
+NOTES / ASSUMPTIONS STATED (Section 2.1):
+- Python 3.13 (cp313 wheels). Any fetched PumpSmart code may predate this;
+  re-verify on fetch per Section 3.2.
+- torchvision resolved to 0.21.0 (correct match for torch 2.6.0; unused — no
+  image models in this project). Left as-is.
+- CRLF/LF warning on .gitignore is expected on Windows (core.autocrlf). Harmless.
+
+ISSUE FOUND + FIXED:
+- File initially landed as "gitignore" (leading dot stripped on download).
+  Renamed to ".gitignore"; confirmed .venv ignored before committing.
+
+----------------------------------------------------------------
+OPEN BEFORE 4.3 (Section 4.1, P2-0) — FREEZE CONFIRMATION
+----------------------------------------------------------------
+[ ] PumpSmart full prototype saved as runnable, timestamped backup, demonstrable.
+[ ] Two truth-numbers recorded + separated:
+      - offline held-out sequence macro F1 = 0.9529 (capability)
+      - live single-window classification ~52% (serving-gap lower bound)
+[ ] Real-world F1 expectation band acknowledged (C-26: 0.65-0.85 disclaimer).
+
+----------------------------------------------------------------
+NEXT STAGE
+----------------------------------------------------------------
+Section 4.3 — Settle the definitional edges:
+  Edge 1: collapse-bar (what justifies collapsing a prior build).
+  Edge 2: analysis vocabulary (break-cause categories, deviation measure +
+          units + reference envelope, signature descriptors, 4 Principal Criteria).
+  Edge 3: one foundational pass or two (recommendation on record: foundation
+          thread primary + leakage diagnostic parallel on frozen prototype).
+================================================================
