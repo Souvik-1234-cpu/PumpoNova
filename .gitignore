@@ -1,0 +1,49 @@
+# ---- Pumponova .gitignore ----
+# Section 1.6: fresh venv stays local, never committed
+.venv/
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Large model artifacts — use Git LFS or HF, not Git history (>45 MB rule)
+*.pt
+*.pth
+*.onnx
+*.pkl
+*.joblib
+*.h5
+*.ckpt
+
+# Data — raw + intermediate, kept out of Git (CIRA SACIP comes from Zenodo)
+data/raw/
+data/interim/
+data/processed/
+*.csv
+*.parquet
+*.npy
+*.npz
+# (whitelist small reference CSVs explicitly if ever needed, e.g. !configs/example.csv)
+
+# Logs and run outputs
+*.log
+logs/
+runs/
+outputs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Environment secrets (HF tokens, API keys) — never commit
+.env
+*.token
+hf_token.txt
