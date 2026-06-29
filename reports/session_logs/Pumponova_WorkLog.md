@@ -99,35 +99,70 @@ because it is the evidence that *justifies* re-founding at all (E.5). Governed b
 
 ---
 
-## RAW DATASET INVENTORY (Section 2.1 — stated explicitly; Section 2.5 — verify on load)
+## RAW DATASET INVENTORY (Section 2.1 — stated; Section 2.5 — verify on load)
 
-> The raw datasets are NOT YET on disk in `data/raw/`. To be added by Souvik. Recorded here as the
-> stated state of the data before it is loaded; **every property below is re-verified against the
-> actual files when they land** (shape, columns, units, cadence, NaN extent) before any analysis keys
-> logic to them.
+Files now present in `data/raw/` (9 CSVs), confirmed by inspection + cross-checked against the
+official CIRA SACIP dataset description (Zenodo). Schema and clean/corrupt status established from
+Excel inspection of two files plus the source documentation.
 
-- **Total raw datasets: 9** (referenced as datasets 1–9).
-- **Usable training/analysis pool: datasets 1–8.**
-- **Dataset 9: corrupted** — contains NaN / NS values; **excluded from the clean usable pool.**
+### Files
+| Pump | Day1 | Day2 | Day3 |
+|------|------|------|------|
+| A    | clean | clean | clean |
+| B    | clean | clean | clean |
+| C    | clean | clean | **CORRUPTED — see below** |
 
-**Important (Section 2.6 — root-cause, not discard):** Dataset 9 is **excluded from training/clean
-analysis but RETAINED for forensic examination under Thread A.** Part E / E.4.2 treats discarded
-fragments as forensic events to explain, not delete. A NaN-laden dataset is exactly the kind of artifact
-Phase 1's usability filter would have thrown away unexamined — the NaN pattern itself may carry a
-signature (sensor dropout, logging failure, a trip that corrupted the write) worth understanding. It is
-therefore **not deleted**; it is flagged and parked for Thread A forensic review, separate from the
-clean pool used for any analysis.
+### Real schema (11 columns, from inspection + source table)
+`Timestamp` (DD-MM-YYYY hh:mm), then ten measured channels:
+`X_ACR_Mot.PV`, `X_ACR_Mot.SV`, `X_ACR_Mot.TV`, `X_ACR_Pmp.PV`, `X_ACR_Pmp.SV`,
+`X_ACR_Pmp.TV`, `X_Temp.SV`, `X_Pres.SV`, `Barometer`, `Temperature`.
+(`X` prefix = pump unit A/B/C.) **Not** the "8 channels" Phase 1 assumed — this is 10 channels +
+timestamp. Re-verify exact header strings byte-level on load.
 
-**Open verification items when data lands (do before any analysis):**
-- [ ] Confirm 9 files present in `data/raw/`; confirm which is dataset 9.
-- [ ] Verify column schema, units, and sampling cadence of datasets 1–8 against the asset's expected
-      8-channel-at-1s assumption (do not assume — measure).
-- [ ] Characterise the dataset-9 corruption: which channels, what fraction NaN, contiguous vs
-      scattered, and whether a physical break-cause is implied.
+### Clean/corrupt status — CORRECTED from the original "datasets 1–9 / #9 corrupt" note
+- **8 valid operational files** form the clean analysis pool: Pump_A ×3, Pump_B ×3, Pump_C ×2.
+- **Pump_C_Day3 is NOT a valid operational day.** Two independent reasons converge:
+  1. **Source says so.** The official CIRA description states the dataset is *eight* CSV files, and
+     that **pump C data is unavailable for one day because the pump was turned off.** Pump_C_Day3 is
+     that off day — it should not contain valid operational data.
+  2. **Encoding corruption.** Its values are mangled by a decimal/thousands-separator fault, e.g.
+     `X_Temp.SV = 19.194.183.349.609.300` (five decimal points — not a number). The other 8 files
+     show clean values (`X_Temp.SV ≈ 23.95`). This is a *systematic* separator-locale mangling of this
+     file specifically, not random NaN.
+- **Disposition (Section 2.6 — examine, don't silently discard):** Pump_C_Day3 is **excluded from the
+  clean pool but RETAINED for Thread-A forensic note.** Its existence answers an E.4.2 forensic
+  question directly ("why was the pump off?" → it was deliberately off that day). Whether the encoding
+  is byte-level recoverable is a Thread-A question; we do not guess decimal positions to "repair" it.
+- Net effect: the local 9-file set, minus Pump_C_Day3, **matches the official 8-file dataset.**
+
+### OPEN AUTHENTICATION ITEM — UNITS DO NOT MATCH PHYSICS (Section 2.3) — BLOCKING for Edge-2
+The source unit table appears inconsistent with the asset nameplate and the observed values. Must be
+resolved before any deviation is measured in "real engineering units" (Edge 2 depends on it):
+- `X_Pres.SV` is labelled **bar**, but clean values are ≈ **0.78** — physically impossible as the
+  running outlet pressure of a 40 bar / 450 m-head pump. Suggests a different unit/scale (or a
+  normalised/ratio quantity), not bar.
+- `X_ACR_Mot.PV` is labelled vibration velocity **m/s**, value ≈ **0.0011**. If actually **mm/s**
+  (ISO 10816 convention), 0.0011 m/s = 1.1 mm/s = a sane "good" vibration level. Strongly suggests the
+  unit is mm/s, not m/s.
+- `X_ACR_Mot.SV` labelled **m/s²** (peak accel) — to be checked against the same logic.
+- **Action:** Thread A must authenticate every channel's true unit against the nameplate physics +
+  ISO 10816/13373 vibration conventions before Edge-2 deviation measurement. Stated units are treated
+  as *candidate*, not authoritative (Section 2.3).
+
+### Asset note
+Source table restates "Power 10 kW" for the pump alongside "110 kW" motor power shaft. **Binding rule
+holds: 110 kW is the asset; 10 kW is a sub-duty test point and is NEVER used in any physics equation.**
+
+### Open verification items (script-driven, before any re-segmentation)
+- [ ] Byte-level read of all 9 files: exact headers, row counts, encoding.
+- [ ] Confirm Pump_C_Day3 is the only file with the multi-dot separator mangling; quantify extent.
+- [ ] Establish true sampling cadence per file from the Timestamp column (the minute-level display
+      `10:00` may hide sub-minute sampling — measure the real interval).
+- [ ] Authenticate units per channel against asset physics (resolve the bar / mm/s discrepancies).
 
 ---
 
 ## NEXT STEP
-Thread A (primary) begins once the raw datasets are in `data/raw/` and the verification items above
-are cleared. First Thread-A action: re-segment raw data without discarding short/broken segments,
-characterising each break in the Edge-2 vocabulary (E.4.2).
+Thread A (primary), step 1: a **forensic inspector script** (no `read_csv` defaults that coerce) that
+reads raw bytes of all 9 files and reports the verification items above. Only after that — and after
+the unit authentication — does re-segmentation (E.4.2) begin.
